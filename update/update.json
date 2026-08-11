@@ -1,23 +1,23 @@
 {
   "schemaVersion": 1,
   "channel": "stable",
-  "versionCode": 6,
-  "versionName": "1.1.4",
-  "publishedAt": "2026-08-11T21:45:26Z",
-  "changelog": "## 更新内容\n\n- 应用包名调整为 com.daxiaamu.coloros.GalleryEnhance\n- 主界面使用标准 Material 3 TopAppBar\n- 更新发布时间按设备本地时区格式化，不再显示原始 T/Z\n- 新增 GPL-3.0-or-later 开源许可证\n- 保留安全的多 CDN 更新、APK 身份与签名校验",
+  "versionCode": 7,
+  "versionName": "1.1.5",
+  "publishedAt": "2026-08-11T21:54:19Z",
+  "changelog": "## 更新内容\n\n- 修复新版本弹层错误复用旧版缓存 APK 的问题\n- 弹层、已验证 APK、安装授权和安装状态严格绑定同一 versionCode\n- 打开系统安装器前重新校验 SHA-256、包名、versionCode 和签名\n- 接受新清单时自动清理其他版本的 APK 与临时下载缓存",
   "maxForcedVersionCode": 0,
-  "policyRevision": 2,
-  "url": "https://ghfast.top/https://github.com/daxiaamu/GalleryEnhance/releases/download/v1.1.4/GalleryEnhance-v1.1.4.apk",
+  "policyRevision": 3,
+  "url": "https://ghfast.top/https://github.com/daxiaamu/GalleryEnhance/releases/download/v1.1.5/GalleryEnhance-v1.1.5.apk",
   "urls": [
-    "https://ghfast.top/https://github.com/daxiaamu/GalleryEnhance/releases/download/v1.1.4/GalleryEnhance-v1.1.4.apk",
-    "https://gh-proxy.com/https://github.com/daxiaamu/GalleryEnhance/releases/download/v1.1.4/GalleryEnhance-v1.1.4.apk",
-    "https://ghproxy.net/https://github.com/daxiaamu/GalleryEnhance/releases/download/v1.1.4/GalleryEnhance-v1.1.4.apk",
-    "https://gh.llkk.cc/https://github.com/daxiaamu/GalleryEnhance/releases/download/v1.1.4/GalleryEnhance-v1.1.4.apk",
-    "https://gh.monlor.com/https://github.com/daxiaamu/GalleryEnhance/releases/download/v1.1.4/GalleryEnhance-v1.1.4.apk",
-    "https://github.com/daxiaamu/GalleryEnhance/releases/download/v1.1.4/GalleryEnhance-v1.1.4.apk"
+    "https://ghfast.top/https://github.com/daxiaamu/GalleryEnhance/releases/download/v1.1.5/GalleryEnhance-v1.1.5.apk",
+    "https://gh-proxy.com/https://github.com/daxiaamu/GalleryEnhance/releases/download/v1.1.5/GalleryEnhance-v1.1.5.apk",
+    "https://ghproxy.net/https://github.com/daxiaamu/GalleryEnhance/releases/download/v1.1.5/GalleryEnhance-v1.1.5.apk",
+    "https://gh.llkk.cc/https://github.com/daxiaamu/GalleryEnhance/releases/download/v1.1.5/GalleryEnhance-v1.1.5.apk",
+    "https://gh.monlor.com/https://github.com/daxiaamu/GalleryEnhance/releases/download/v1.1.5/GalleryEnhance-v1.1.5.apk",
+    "https://github.com/daxiaamu/GalleryEnhance/releases/download/v1.1.5/GalleryEnhance-v1.1.5.apk"
   ],
-  "sha256": "89482478cf9d22e5b053bc4a9d66c581a3370aa9241907276dcd0d323d8352f5",
-  "size": 3000623,
-  "releaseUrl": "https://github.com/daxiaamu/GalleryEnhance/releases/tag/v1.1.4",
-  "policyReason": "Release v1.1.4: Material 3 top app bar, localized publish time, and GPL-3.0-or-later license"
+  "sha256": "a466371dfa30bce7e1c86683304ce6aae28016e2cc2048ce96d9f421fdf475f5",
+  "size": 3001915,
+  "releaseUrl": "https://github.com/daxiaamu/GalleryEnhance/releases/tag/v1.1.5",
+  "policyReason": "Release v1.1.5: bind verified APK and install state to the current versionCode"
 }
