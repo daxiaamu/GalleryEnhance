@@ -4,3 +4,8 @@ local.properties
 **/build/
 analysis/
 tools/
+# Signing material must never enter source control.
+.signing/
+*.jks
+*.keystore
+keystore.properties

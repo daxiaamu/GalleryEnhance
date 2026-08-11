@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import io.github.libxposed.service.XposedService
 import io.github.libxposed.service.XposedServiceHelper
+import com.dxam.coloros.livephotounlock.update.UpdateManager
 
 class ModuleApplication : Application(), XposedServiceHelper.OnServiceListener {
     companion object {
@@ -56,6 +57,7 @@ class ModuleApplication : Application(), XposedServiceHelper.OnServiceListener {
 
     override fun onCreate() {
         super.onCreate()
+        UpdateManager.initialize(this)
         XposedServiceHelper.registerListener(this)
     }
 

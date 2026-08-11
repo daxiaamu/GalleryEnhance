@@ -17,3 +17,10 @@ Compose 页面只显示模块与相册作用域状态。作用域缺失时，模
 
 安装后在支持 libxposed API 102 的框架中启用模块。首次打开模块页面并允许相册
 作用域，然后强制停止相册或重启设备。
+## 应用内更新
+
+主界面启动约 2 秒后会自动检查 stable 更新，也可以在“应用更新”卡片中手动检查。更新清单以 GitHub Contents API 为权威源，并使用多个 Raw/CDN 镜像做容灾；APK 下载后必须依次通过 SHA-256、包名、versionCode 和签名证书校验，随后交给系统安装器。
+
+发布新版本前，先人工更新 `update/policy-stable.json`（预发布版本使用 `policy-beta.json`）并递增 `policyRevision`。发布 GitHub Release 且只附带一个 APK 后，`publish-update-manifest.yml` 会从 APK 读取版本、验证至少 5 个不同主机的完整 APK 哈希，并生成对应的 `update.json`。镜像不足或校验失败时不会覆盖旧清单。
+
+“关于”区域提供作者信息及 [大侠阿木博客](https://www.daxiaamu.com) 入口。

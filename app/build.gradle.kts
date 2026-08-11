@@ -16,14 +16,36 @@ android {
         versionName = "1.1.3"
     }
 
-    buildFeatures { compose = true }
+    val releaseStorePath = providers.environmentVariable("GALLERY_ENHANCE_KEYSTORE").orNull
+    val releaseStorePassword = providers.environmentVariable("GALLERY_ENHANCE_STORE_PASSWORD").orNull
+    val releaseKeyAlias = providers.environmentVariable("GALLERY_ENHANCE_KEY_ALIAS").orNull
+    val releaseKeyPassword = providers.environmentVariable("GALLERY_ENHANCE_KEY_PASSWORD").orNull
+
+    signingConfigs {
+        if (listOf(releaseStorePath, releaseStorePassword, releaseKeyAlias, releaseKeyPassword).all { it != null }) {
+            create("release") {
+                storeFile = file(checkNotNull(releaseStorePath))
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+                enableV1Signing = false
+                enableV2Signing = true
+                enableV3Signing = true
+                enableV4Signing = false
+            }
+        }
+    }
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
 
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs["debug"]
+            signingConfig = signingConfigs.findByName("release")
         }
     }
 
@@ -54,6 +76,7 @@ dependencies {
     val composeBom = platform("androidx.compose:compose-bom:2026.06.00")
     implementation(composeBom)
     implementation("androidx.activity:activity-compose:1.13.0")
+    implementation("androidx.core:core-ktx:1.17.0")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-tooling-preview")

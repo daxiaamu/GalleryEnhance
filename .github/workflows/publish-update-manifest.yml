@@ -1,0 +1,131 @@
+name: Publish update manifest
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-manifest-${{ github.event.release.prerelease && 'beta' || 'stable' }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+
+      - name: Download the unique APK asset
+        id: asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t ids < <(jq -r '.release.assets[] | select(.name | endswith(".apk")) | [.id,.name] | @tsv' "$GITHUB_EVENT_PATH")
+          test "${#ids[@]}" -eq 1 || { echo "Release must contain exactly one APK" >&2; exit 1; }
+          IFS=$'\t' read -r asset_id apk_name <<< "${ids[0]}"
+          gh api -H 'Accept: application/octet-stream' "/repos/${GITHUB_REPOSITORY}/releases/assets/${asset_id}" > "$apk_name"
+          echo "apk=$apk_name" >> "$GITHUB_OUTPUT"
+
+      - name: Read and validate APK identity
+        id: apk
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk='${{ steps.asset.outputs.apk }}'
+          aapt="$(find "$ANDROID_HOME/build-tools" -type f -name aapt2 | sort -V | tail -1)"
+          badging="$($aapt dump badging "$apk")"
+          package="$(sed -n "s/^package: name='\([^']*\)'.*/\1/p" <<< "$badging")"
+          version_code="$(sed -n "s/^package:.*versionCode='\([^']*\)'.*/\1/p" <<< "$badging")"
+          version_name="$(sed -n "s/^package:.*versionName='\([^']*\)'.*/\1/p" <<< "$badging")"
+          test "$package" = 'com.dxam.coloros.livephotounlock'
+          tag='${{ github.event.release.tag_name }}'
+          test "${tag#v}" = "$version_name" || { echo "Tag $tag does not match APK $version_name" >&2; exit 1; }
+          echo "version_code=$version_code" >> "$GITHUB_OUTPUT"
+          echo "version_name=$version_name" >> "$GITHUB_OUTPUT"
+          echo "sha256=$(sha256sum "$apk" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+          echo "size=$(stat -c%s "$apk")" >> "$GITHUB_OUTPUT"
+
+      - name: Verify CDN candidates and generate JSON
+        shell: bash
+        env:
+          APK: ${{ steps.asset.outputs.apk }}
+          VERSION_CODE: ${{ steps.apk.outputs.version_code }}
+          VERSION_NAME: ${{ steps.apk.outputs.version_name }}
+          SHA256: ${{ steps.apk.outputs.sha256 }}
+          SIZE: ${{ steps.apk.outputs.size }}
+        run: |
+          set -euo pipefail
+          if [ '${{ github.event.release.prerelease }}' = 'true' ]; then channel=beta; else channel=stable; fi
+          policy="update/policy-${channel}.json"
+          target="update/update${channel:+-$channel}.json"
+          [ "$channel" = stable ] && target='update/update.json'
+          forced="$(jq -er '.maxForcedVersionCode | numbers' "$policy")"
+          revision="$(jq -er '.policyRevision | numbers' "$policy")"
+          reason="$(jq -er '.reason | strings | select(length > 0)' "$policy")"
+          test "$forced" -ge 0 && test "$forced" -lt "$VERSION_CODE"
+          test "$revision" -gt 0
+          if [ -f "$target" ]; then test "$revision" -gt "$(jq -r '.policyRevision' "$target")" || { echo 'policyRevision must increase for every release' >&2; exit 1; }; fi
+          official="https://github.com/${GITHUB_REPOSITORY}/releases/download/${{ github.event.release.tag_name }}/${APK}"
+          candidates=(
+            "https://ghfast.top/$official"
+            "https://gh-proxy.com/$official"
+            "https://ghproxy.net/$official"
+            "https://gh.llkk.cc/$official"
+            "https://ghp.keleyaa.com/$official"
+            "https://gh.monlor.com/$official"
+            "https://xget.xi-xu.me/gh/${GITHUB_REPOSITORY}/releases/download/${{ github.event.release.tag_name }}/${APK}"
+            "https://ghproxy.vip/$official?sha=$SHA256"
+            "https://gh.jasonzeng.dev/$official"
+            "https://gh.3w.pm/$official"
+            "https://gh-proxy.org/$official"
+          )
+          good=()
+          hosts=()
+          for url in "${candidates[@]}"; do
+            host="$(sed -E 's#https://([^/]+)/.*#\1#' <<< "$url" | tr '[:upper:]' '[:lower:]')"
+            [[ " ${hosts[*]} " == *" $host "* ]] && continue
+            tmp="$(mktemp)"
+            if curl --fail --location --proto '=https' --proto-redir '=https' --connect-timeout 10 --max-time 180 -A 'GalleryEnhance-release-validator' -o "$tmp" "$url" &&
+               test "$(stat -c%s "$tmp")" = "$SIZE" &&
+               test "$(sha256sum "$tmp" | cut -d' ' -f1)" = "$SHA256"; then
+              good+=("$url"); hosts+=("$host")
+            fi
+            rm -f "$tmp"
+            [ "${#good[@]}" -ge 5 ] && break
+          done
+          test "${#good[@]}" -ge 5 || { echo 'Fewer than five verified CDN hosts; keeping previous manifest' >&2; exit 1; }
+          good+=("$official")
+          urls_json="$(printf '%s\n' "${good[@]}" | jq -R . | jq -s .)"
+          jq -n \
+            --arg channel "$channel" \
+            --arg versionName "$VERSION_NAME" \
+            --arg publishedAt '${{ github.event.release.published_at }}' \
+            --arg changelog "$(jq -r '.release.body // ""' "$GITHUB_EVENT_PATH")" \
+            --arg sha256 "$SHA256" \
+            --arg releaseUrl '${{ github.event.release.html_url }}' \
+            --arg reason "$reason" \
+            --argjson versionCode "$VERSION_CODE" \
+            --argjson maxForcedVersionCode "$forced" \
+            --argjson policyRevision "$revision" \
+            --argjson size "$SIZE" \
+            --argjson urls "$urls_json" \
+            '{schemaVersion:1,channel:$channel,versionCode:$versionCode,versionName:$versionName,publishedAt:$publishedAt,changelog:$changelog,maxForcedVersionCode:$maxForcedVersionCode,policyRevision:$policyRevision,url:$urls[0],urls:$urls,sha256:$sha256,size:$size,releaseUrl:$releaseUrl,policyReason:$reason}' > "$target"
+          jq -e '.schemaVersion == 1 and (.urls|length) >= 5 and (.sha256|test("^[0-9a-f]{64}$")) and .maxForcedVersionCode >= 0 and .maxForcedVersionCode < .versionCode' "$target" >/dev/null
+
+      - name: Commit manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add update/update*.json
+          git commit -m "chore: publish update manifest for ${{ github.event.release.tag_name }}"
+          git pull --rebase origin '${{ github.event.repository.default_branch }}'
+          git push origin HEAD:'${{ github.event.repository.default_branch }}'
