@@ -1,5 +1,5 @@
 {
   "maxForcedVersionCode": 0,
-  "policyRevision": 2,
-  "reason": "Release v1.1.4: Material 3 top app bar, localized publish time, and GPL-3.0-or-later license"
+  "policyRevision": 3,
+  "reason": "Release v1.1.5: bind verified APK and install state to the current versionCode"
 }

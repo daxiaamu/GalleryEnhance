@@ -183,6 +183,9 @@ private fun UpdateDialog(activity: MainActivity, update: UpdateManifest) {
     val required = update.isRequired(BuildConfig.VERSION_CODE.toLong())
     val download = UpdateManager.downloadState
     val busy = download is DownloadState.Downloading || download == DownloadState.Verifying
+    val readyForCurrent = (download as? DownloadState.ReadyToInstall)?.versionCode == update.versionCode
+    val authorizationForCurrent = (download as? DownloadState.NeedsAuthorization)?.versionCode == update.versionCode
+    val launchingForCurrent = (download as? DownloadState.LaunchingInstaller)?.versionCode == update.versionCode
     BackHandler(required || busy) {}
     Dialog(
         onDismissRequest = { if (!required && !busy) UpdateManager.ignore(update) },
@@ -213,12 +216,13 @@ private fun UpdateDialog(activity: MainActivity, update: UpdateManifest) {
                     Spacer(Modifier.weight(1f))
                     Button(
                         onClick = {
-                            when (download) {
-                                is DownloadState.ReadyToInstall, DownloadState.NeedsAuthorization -> UpdateManager.install(activity)
-                                else -> UpdateManager.download(update)
+                            if (readyForCurrent || authorizationForCurrent) {
+                                UpdateManager.install(activity, update)
+                            } else {
+                                UpdateManager.download(update)
                             }
                         },
-                        enabled = !busy && download != DownloadState.LaunchingInstaller,
+                        enabled = !busy && !launchingForCurrent,
                         modifier = Modifier.defaultMinSize(minWidth = 116.dp, minHeight = 48.dp),
                         contentPadding = PaddingValues(horizontal = 14.dp)
                     ) {
@@ -229,9 +233,10 @@ private fun UpdateDialog(activity: MainActivity, update: UpdateManifest) {
                                 Spacer(Modifier.width(8.dp)); Text(download.percent?.let { "$it%" } ?: "下载中")
                             }
                             DownloadState.Verifying -> { CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp); Spacer(Modifier.width(8.dp)); Text("校验中") }
-                            is DownloadState.ReadyToInstall, DownloadState.NeedsAuthorization -> Text("安装")
+                            is DownloadState.ReadyToInstall -> Text(if (readyForCurrent) "安装" else "下载安装")
+                            is DownloadState.NeedsAuthorization -> Text(if (authorizationForCurrent) "继续安装" else "下载安装")
                             is DownloadState.Failed -> Text("重试下载")
-                            DownloadState.LaunchingInstaller -> Text("正在打开")
+                            is DownloadState.LaunchingInstaller -> Text(if (launchingForCurrent) "正在打开" else "下载安装")
                             else -> Text("下载安装")
                         }
                     }

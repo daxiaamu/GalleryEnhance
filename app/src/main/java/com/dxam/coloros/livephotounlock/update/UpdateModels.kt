@@ -29,7 +29,7 @@ sealed interface DownloadState {
     data class Downloading(val percent: Int?) : DownloadState
     data object Verifying : DownloadState
     data class ReadyToInstall(val versionCode: Long) : DownloadState
-    data object NeedsAuthorization : DownloadState
-    data object LaunchingInstaller : DownloadState
+    data class NeedsAuthorization(val versionCode: Long) : DownloadState
+    data class LaunchingInstaller(val versionCode: Long) : DownloadState
     data class Failed(val message: String) : DownloadState
 }

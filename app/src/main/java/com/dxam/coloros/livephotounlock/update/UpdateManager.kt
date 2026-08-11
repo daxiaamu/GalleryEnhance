@@ -105,7 +105,20 @@ object UpdateManager {
         val current = BuildConfig.VERSION_CODE.toLong()
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         prefs.edit { putLong("highest_policy_revision", manifest.policyRevision) }
+        val stateVersion = when (val state = downloadState) {
+            is DownloadState.ReadyToInstall -> state.versionCode
+            is DownloadState.NeedsAuthorization -> state.versionCode
+            is DownloadState.LaunchingInstaller -> state.versionCode
+            else -> null
+        }
+        if (stateVersion != null && stateVersion != manifest.versionCode) {
+            verifiedApk = null
+            downloadState = DownloadState.NotStarted
+        }
         val cachedApk = File(context.cacheDir, "updates/update-${manifest.versionCode}.apk")
+        cachedApk.parentFile?.listFiles()?.filter {
+            it != cachedApk && (it.name.endsWith(".apk") || it.name.endsWith(".download"))
+        }?.forEach(File::delete)
         if (cachedApk.isFile && verifyDownloadedApk(context, cachedApk, manifest)) {
             verifiedApk = cachedApk
             downloadState = DownloadState.ReadyToInstall(manifest.versionCode)
@@ -337,14 +350,25 @@ object UpdateManager {
         true
     }.getOrDefault(false)
 
-    fun install(activity: Activity) {
-        val file = verifiedApk ?: return
+    fun install(activity: Activity, update: UpdateManifest) {
+        val file = verifiedApk
+        val stateVersion = when (val state = downloadState) {
+            is DownloadState.ReadyToInstall -> state.versionCode
+            is DownloadState.NeedsAuthorization -> state.versionCode
+            else -> null
+        }
+        if (file == null || stateVersion != update.versionCode || !verifyDownloadedApk(activity, file, update)) {
+            file?.delete()
+            verifiedApk = null
+            downloadState = DownloadState.Failed("已缓存安装包与当前更新版本不匹配，请重新下载")
+            return
+        }
         if (!activity.packageManager.canRequestPackageInstalls()) {
-            downloadState = DownloadState.NeedsAuthorization
+            downloadState = DownloadState.NeedsAuthorization(update.versionCode)
             activity.startActivity(Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, "package:${activity.packageName}".toUri()))
             return
         }
-        downloadState = DownloadState.LaunchingInstaller
+        downloadState = DownloadState.LaunchingInstaller(update.versionCode)
         val uri = FileProvider.getUriForFile(activity, "${activity.packageName}.fileprovider", file)
         activity.startActivity(Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(uri, "application/vnd.android.package-archive")
@@ -353,7 +377,9 @@ object UpdateManager {
     }
 
     fun resumeInstallation(activity: Activity) {
-        if (downloadState == DownloadState.NeedsAuthorization && activity.packageManager.canRequestPackageInstalls()) install(activity)
+        val state = downloadState as? DownloadState.NeedsAuthorization ?: return
+        val update = dialogUpdate?.takeIf { it.versionCode == state.versionCode } ?: return
+        if (activity.packageManager.canRequestPackageInstalls()) install(activity, update)
     }
 
     private fun sha256(file: File): String {
