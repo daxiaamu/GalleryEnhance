@@ -36,6 +36,9 @@ import com.dxam.coloros.livephotounlock.update.DownloadState
 import com.dxam.coloros.livephotounlock.update.UpdateManager
 import com.dxam.coloros.livephotounlock.update.UpdateManifest
 import kotlinx.coroutines.delay
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,6 +58,7 @@ private val Accent = Color(0xFF246BFD)
 private val Success = Color(0xFF15805D)
 private val Warning = Color(0xFFB75D00)
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ModuleScreen(activity: MainActivity) {
     val context = LocalContext.current
@@ -93,13 +97,29 @@ private fun ModuleScreen(activity: MainActivity) {
     }
 
     MaterialTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = Background) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = Background,
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Column {
+                            Text("ColorOS 相册增强", fontWeight = FontWeight.Bold)
+                            Text("实况导出时长解锁", style = MaterialTheme.typography.bodySmall, color = Color(0xFF60646C))
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Background)
+                )
+            }
+        ) { contentPadding ->
             Column(
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 34.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 24.dp, vertical = 18.dp),
                 verticalArrangement = Arrangement.spacedBy(18.dp)
             ) {
-                Text("ColorOS 相册增强", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                Text("实况导出时长解锁", color = Color(0xFF60646C))
                 StatusCard(statusColor, statusTitle, statusDetail, galleryVersion, active, hasScope)
                 UpdateCard()
                 AboutCard()
@@ -175,7 +195,7 @@ private fun UpdateDialog(activity: MainActivity, update: UpdateManifest) {
                 SelectionContainer {
                     Column(Modifier.fillMaxWidth().heightIn(max = 420.dp).verticalScroll(rememberScrollState())) {
                         Text("版本 ${update.versionName}", fontWeight = FontWeight.SemiBold)
-                        update.publishedAt?.let { Text("发布时间：$it", style = MaterialTheme.typography.bodySmall, color = Color.Gray) }
+                        update.publishedAt?.let { Text("发布时间：${formatPublishedAt(it)}", style = MaterialTheme.typography.bodySmall, color = Color.Gray) }
                         Spacer(Modifier.height(12.dp))
                         SafeMarkdown(update.changelog)
                         (download as? DownloadState.Failed)?.let {
@@ -282,4 +302,11 @@ private fun AboutCard() {
             Text("进入大侠阿木博客", color = Accent, textDecoration = TextDecoration.Underline)
         }
     }
+}
+private val PublishedAtFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+
+private fun formatPublishedAt(value: String): String = runCatching {
+    Instant.parse(value).atZone(ZoneId.systemDefault()).format(PublishedAtFormatter)
+}.getOrElse {
+    value.replace('T', ' ').removeSuffix("Z").substringBefore('.')
 }

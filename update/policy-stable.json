@@ -1,5 +1,5 @@
 {
   "maxForcedVersionCode": 0,
-  "policyRevision": 1,
-  "reason": "Initial stable update policy"
+  "policyRevision": 2,
+  "reason": "Release v1.1.4: Material 3 top app bar, localized publish time, and GPL-3.0-or-later license"
 }

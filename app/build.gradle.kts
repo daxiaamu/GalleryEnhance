@@ -9,11 +9,11 @@ android {
     buildToolsVersion = "36.0.0"
 
     defaultConfig {
-        applicationId = "com.dxam.coloros.livephotounlock"
+        applicationId = "com.daxiaamu.coloros.GalleryEnhance"
         minSdk = 33
         targetSdk = 36
-        versionCode = 4
-        versionName = "1.1.3"
+        versionCode = 6
+        versionName = "1.1.4"
     }
 
     val releaseStorePath = providers.environmentVariable("GALLERY_ENHANCE_KEYSTORE").orNull

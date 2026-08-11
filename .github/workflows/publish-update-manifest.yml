@@ -44,7 +44,7 @@ jobs:
           package="$(sed -n "s/^package: name='\([^']*\)'.*/\1/p" <<< "$badging")"
           version_code="$(sed -n "s/^package:.*versionCode='\([^']*\)'.*/\1/p" <<< "$badging")"
           version_name="$(sed -n "s/^package:.*versionName='\([^']*\)'.*/\1/p" <<< "$badging")"
-          test "$package" = 'com.dxam.coloros.livephotounlock'
+          test "$package" = 'com.daxiaamu.coloros.GalleryEnhance'
           tag='${{ github.event.release.tag_name }}'
           test "${tag#v}" = "$version_name" || { echo "Tag $tag does not match APK $version_name" >&2; exit 1; }
           echo "version_code=$version_code" >> "$GITHUB_OUTPUT"

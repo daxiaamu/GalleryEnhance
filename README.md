@@ -26,3 +26,6 @@ Compose 页面只显示模块与相册作用域状态。作用域缺失时，模
 发布新版本前，先人工更新 `update/policy-stable.json`（预发布版本使用 `policy-beta.json`）并递增 `policyRevision`。发布 GitHub Release 且只附带一个 APK 后，`publish-update-manifest.yml` 会从 APK 读取版本、验证至少 5 个不同主机的完整 APK 哈希，并生成对应的 `update.json`。镜像不足或校验失败时不会覆盖旧清单。
 
 “关于”区域提供作者信息及 [大侠阿木博客](https://www.daxiaamu.com) 入口。
+## 许可证
+
+本项目采用 [GNU General Public License v3.0 or later](LICENSE) 发布，SPDX 标识为 `GPL-3.0-or-later`。
