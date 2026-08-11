@@ -1,5 +1,23 @@
 # ColorOS 相册实况时长解锁
 
+[![Release](https://img.shields.io/github/v/release/daxiaamu/GalleryEnhance?display_name=tag&sort=semver)](https://github.com/daxiaamu/GalleryEnhance/releases/latest)
+[![APK downloads](https://img.shields.io/github/downloads/daxiaamu/GalleryEnhance/total?logo=github)](https://github.com/daxiaamu/GalleryEnhance/releases)
+[![Download APK](https://img.shields.io/badge/下载-APK-246BFD?logo=android&logoColor=white)](https://github.com/daxiaamu/GalleryEnhance/releases/latest)
+[![License](https://img.shields.io/github/license/daxiaamu/GalleryEnhance)](LICENSE)
+[![Update manifest](https://github.com/daxiaamu/GalleryEnhance/actions/workflows/publish-update-manifest.yml/badge.svg)](https://github.com/daxiaamu/GalleryEnhance/actions/workflows/publish-update-manifest.yml)
+
+[![Android 13+](https://img.shields.io/badge/Android-13%2B-3DDC84?logo=android&logoColor=white)](https://developer.android.com/about/versions/13)
+[![Kotlin 2.3.10](https://img.shields.io/badge/Kotlin-2.3.10-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
+[![libxposed API 102](https://img.shields.io/badge/libxposed_API-102-ED1C24)](https://github.com/libxposed/api)
+[![minSdk 33](https://img.shields.io/badge/minSdk-33-3DDC84)](app/build.gradle.kts)
+[![targetSdk 36](https://img.shields.io/badge/targetSdk-36-3DDC84)](app/build.gradle.kts)
+
+[![Stars](https://img.shields.io/github/stars/daxiaamu/GalleryEnhance?style=flat&logo=github)](https://github.com/daxiaamu/GalleryEnhance/stargazers)
+[![Forks](https://img.shields.io/github/forks/daxiaamu/GalleryEnhance?style=flat&logo=github)](https://github.com/daxiaamu/GalleryEnhance/forks)
+[![Issues](https://img.shields.io/github/issues/daxiaamu/GalleryEnhance)](https://github.com/daxiaamu/GalleryEnhance/issues)
+[![Last commit](https://img.shields.io/github/last-commit/daxiaamu/GalleryEnhance)](https://github.com/daxiaamu/GalleryEnhance/commits/main)
+[![Repo size](https://img.shields.io/github/repo-size/daxiaamu/GalleryEnhance)](https://github.com/daxiaamu/GalleryEnhance)
+
 [【机场推荐：白月光，稳定高速】](https://www.sibker.com/register?invite_code=2XQR1UUz)
 
 libxposed API 102 模块，仅作用于 `com.coloros.gallery3d`。
