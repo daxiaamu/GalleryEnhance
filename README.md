@@ -1,5 +1,7 @@
 # ColorOS 相册实况时长解锁
 
+[【机场推荐：白月光，稳定高速】](https://www.sibker.com/register?invite_code=2XQR1UUz)
+
 libxposed API 102 模块，仅作用于 `com.coloros.gallery3d`。
 
 模块使用 DexKit 2.2.0 根据稳定配置字符串动态定位混淆方法，并为 ColorOS 相册
