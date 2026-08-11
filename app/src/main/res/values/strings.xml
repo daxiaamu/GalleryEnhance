@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ColorOS 相册实况时长解锁</string>
+    <string name="module_description">移除 ColorOS 相册将视频导出为实况照片的 3 秒时长限制</string>
+</resources>
