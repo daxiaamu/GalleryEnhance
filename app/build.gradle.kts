@@ -12,7 +12,7 @@ android {
         applicationId = "com.dxam.coloros.livephotounlock"
         minSdk = 33
         targetSdk = 36
-        versionCode = 5
+        versionCode = 4
         versionName = "1.1.3"
     }
 
